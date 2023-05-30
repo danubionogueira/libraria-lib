@@ -153,6 +153,42 @@ Author::Author(string fullName){
 	setFullName(fullName);
 }
 
+int PublishingDate::getYear(){
+	return year;
+}
+
+void PublishingDate::setYear(const int year){
+	this->year = year;
+}
+
+nmonth PublishingDate::getMonth(){
+	return month;
+}
+
+void PublishingDate::setMonth(const nmonth month){
+	this->month = month;
+}
+
+nmday PublishingDate::getDay(){
+	return day;
+}
+
+void PublishingDate::setDay(const nmday day){
+	this->day = day;
+}
+
+PublishingDate::PublishingDate(const int year, const nmonth month, const nmday day){
+	setYear(year);
+	setMonth(month);
+	setDay(day);
+}
+
+PublishingDate::PublishingDate(PublishingDate &publishingDate){
+	setYear(publishingDate.getYear());
+	setMonth(publishingDate.getMonth());
+	setDay(publishingDate.getDay());
+}
+
 string Book::getTitle(){
 	return title;
 }
@@ -176,6 +212,26 @@ void Book::setAuthor(Author &author){
 	this->author = &author;
 }
 
+string Book::getPublisher(){
+	return publisher;
+}
+
+void Book::setPublisher(const string publisher){
+	this->publisher = publisher;
+}
+
+PublishingDate* Book::getPublishingDate(){
+	return publishingDate;
+}
+
+void Book::setPublishingDate(PublishingDate &publishingDate){
+	this->publishingDate = new PublishingDate(publishingDate);
+}
+
+void Book::setPublishingDate(const int year, const nmonth month, const nmday day){
+	this->publishingDate = new PublishingDate(year, month, day);
+}
+
 Book::Book(const string title, const string author){
 	setTitle(title);
 	setAuthor(author);
@@ -184,4 +240,8 @@ Book::Book(const string title, const string author){
 Book::Book(const string title, Author &author){
 	setTitle(title);
 	setAuthor(author);
+}
+
+Book::~Book(){
+	delete this->publishingDate;
 }

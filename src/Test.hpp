@@ -19,3 +19,4 @@ class Test{
 
 #define testSuccess(test, name, message) test->addSuccess(name, __FILE__, __LINE__, message)
 #define testError(test, name, message) test->addError(name, __FILE__, __LINE__, message)
+#define test(test, name, condition, msgGood, msgBad) if ((condition)){ testSuccess(test, name, msgGood); } else { testError(test, name, msgBad); }

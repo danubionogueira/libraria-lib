@@ -12,60 +12,31 @@ void testAuthorRegular(Test* test){
 	Author* author = new Author("First Middle Last");
 	string name = "Testing regular Author";
 
-	if (author->getFirstName() == "First")
-		testSuccess(test, name, "Author first name is ok");
-	else
-		testError(test, name, "Author first name is wrong");
-
-	if (author->getMiddleName() == "Middle")
-		testSuccess(test, name, "Author middle name is ok");
-	else
-		testError(test, name, "Author middle name is wrong");
-
-	if (author->getLastName() == "Last")
-		testSuccess(test, name, "Author last name is ok");
-	else
-		testError(test, name, "Author last name is wrong");
-
-	if (author->getFullName() == "First Middle Last")
-		testSuccess(test, name, "Author full name is ok");
-	else
-		testError(test, name, "Author full name is wrong");
-
-	if (author->getAbbreviatedFirstName() == "F.")
-		testSuccess(test, name, "Author abbreviated first name is ok");
-	else
-		testError(test, name, "Author abbreviated first name is wrong, expected 'F.' got '" + author->getAbbreviatedFirstName() + "'");
-
-	if (author->getAbbreviatedMiddleName() == "M.")
-		testSuccess(test, name, "Author abbreviated middle name is ok");
-	else
-		testError(test, name, "Author abbreviated middle name is wrong, expected 'M.' got '" + author->getAbbreviatedMiddleName() + "'");
-
-	if (author->getAbbreviatedLastName() == "L.")
-		testSuccess(test, name, "Author abbreviated last name is ok");
-	else
-		testError(test, name, "Author abbreviated last name is wrong, expected 'L.' got '" + author->getAbbreviatedLastName() + "'");
-
-	if (author->getAbbreviatedFullName() == "F. M. L.")
-		testSuccess(test, name, "Author abbreviated full name is ok");
-	else
-		testError(test, name, "Author abbreviated full name is wrong, expected 'F. M. L.' got '" + author->getAbbreviatedFullName() + "'");
+	test(test, name, author->getFirstName() == "First", "Author first name is ok", "Author first name is wrong");
+	test(test, name, author->getMiddleName() == "Middle", "Author middle name is ok", "Author middle name is wrong");
+	test(test, name, author->getLastName() == "Last", "Author last name is ok", "Author last name is wrong");
+	test(test, name, author->getFullName() == "First Middle Last", "Author full name is ok", "Author full name is wrong");
+	test(test, name, author->getAbbreviatedFirstName() == "F.", "Author abbreviated first name is ok", "Author abbreviated first name is wrong, expected 'F.' got '" + author->getAbbreviatedFirstName() + "'");
+	test(test, name, author->getAbbreviatedMiddleName() == "M.", "Author abbreviated middle name is ok", "Author abbreviated middle name is wrong, expected 'M.' got '" + author->getAbbreviatedMiddleName() + "'");
+	test(test, name, author->getAbbreviatedLastName() == "L.", "Author abbreviated last name is ok", "Author abbreviated last name is wrong, expected 'L.' got '" + author->getAbbreviatedLastName() + "'");
+	test(test, name, author->getAbbreviatedFullName() == "F. M. L.", "Author abbreviated full name is ok", "Author abbreviated full name is wrong, expected 'F. M. L.' got '" + author->getAbbreviatedFullName() + "'");
 }
 
 void testBookRegular(Test* test){
 	Book* book = new Book("Test title", "Test Author");
 	string name = "Testing regular Book";
 
-	if (book->getTitle() == "Test title")
-		testSuccess(test, name, "Book title is ok");
-	else
-		testError(test, name, "Book title is wrong");
+	book->setPublisher("Some Publisher");
+	book->setPublishingDate(1999);
 
-	if (book->getAuthor()->getFullName() == "Test Author")
-		testSuccess(test, name, "Book author is ok");
-	else
-		testError(test, name, "Book author is wrong");
+	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
+	test(test, name, book->getAuthor()->getFullName() == "Test Author", "Book author is ok", "Book author is wrong");
+	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
+	test(test, name, book->getPublishingDate()->getYear() == 1999, "Book publishing year ok", "Book publishing year wrong");
+	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
+	test(test, name, book->getPublishingDate()->getDay() == md_unknown, "Book publishing day ok", "Book publishing day wrong");
+
+	delete book;
 }
 
 void testBookEmptyTitle(Test* test){
@@ -74,6 +45,7 @@ void testBookEmptyTitle(Test* test){
 	try{
 		Book* book = new Book("", "");
 		testError(test, name, "Book title is wrong");
+		delete book;
 	}
 	catch (EmptyBookTitleException e){
 		string message = e.what();
@@ -85,14 +57,14 @@ void Test::addSuccess(string testName, string testFile, unsigned int fileLine, s
 	successes += 1;
 
 		if (printSuccesses)
-		cout << "success:" + testFile + ":" + to_string(fileLine) + " -> " + message + " (" + testName + ")" << endl;
+		cout << "success:" + testFile + ":" + to_string(fileLine) + " -> " + testName + " -> " + message << endl;
 }
 
 void Test::addError(string testName, string testFile, unsigned int fileLine, string message){
 	errors += 1;
 
 	if (printErrors)
-		cout << "error:" + testFile + ":" + to_string(fileLine) + " -> " + message + " (" + testName + ")" << endl;
+		cout << "error:" + testFile + ":" + to_string(fileLine) + " -> " + testName + " -> " + message << endl;
 }
 
 void Test::run(bool printSuccesses, bool printErrors){
