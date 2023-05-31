@@ -47,6 +47,9 @@ class Author{
 		string getAbbreviatedMiddleName();
 		void setAbbreviatedMiddleName(const string abbreviatedMiddleName);
 
+		string getReferenceName();
+		void setReferenceName(const string referenceName);
+
 		string getPopoularName();
 		void setPopularName(const string popularName);
 

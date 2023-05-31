@@ -1,9 +1,19 @@
 #include "Book.hpp"
 #include <string>
 #include <vector>
+#include <cstring>
 
 using std::string;
 using std::vector;
+
+string toUpper(const string str){
+	char* result = (char*)str.c_str();
+
+	for (int i=0; i<strlen(result); i++)
+		result[i] = toupper(result[i]);
+
+	return string(result);
+}
 
 const char* EmptyBookTitleException::what(){
 	return "Book title can't be empty";
@@ -40,6 +50,7 @@ void Author::setFullName(const string fullName){
 	abbreviatedFirstName = "";
 	abbreviatedMiddleName = "";
 	abbreviatedLastName = "";
+	referenceName = "";
 
 	if (s > 0){
 		lastName = names[s - 1];
@@ -72,14 +83,30 @@ void Author::setFullName(const string fullName){
 	if (middleName != "")
 		this->fullName = this->fullName + middleName + " ";
 
-	if (lastName != "")
+	if (lastName != ""){
 		this->fullName = this->fullName + lastName;
+		referenceName = toUpper(lastName);
+	}
 
-	if (abbreviatedFirstName != "")
+	if (abbreviatedFirstName != ""){
 		abbreviatedFullName = abbreviatedFirstName + " ";
 
-	if (abbreviatedMiddleName != "")
+		if (lastName != "")
+			referenceName += ", ";
+
+		referenceName += abbreviatedFirstName;
+	}
+
+	if (abbreviatedMiddleName != ""){
 		abbreviatedFullName += abbreviatedMiddleName + " ";
+
+		if (firstName != "")
+			referenceName += " ";
+		else if (lastName != "")
+			referenceName += ", ";
+
+		referenceName += abbreviatedMiddleName;
+	}
 
 	if (abbreviatedLastName != "")
 		abbreviatedFullName += abbreviatedLastName;
@@ -139,6 +166,14 @@ string Author::getAbbreviatedMiddleName(){
 
 void Author::setAbbreviatedMiddleName(const string abbreviatedMiddleName){
 	this->abbreviatedMiddleName = abbreviatedMiddleName;
+}
+
+string Author::getReferenceName(){
+	return referenceName;
+}
+
+void Author::setReferenceName(const string referenceName){
+	this->referenceName = referenceName;
 }
 
 string Author::getPopoularName(){
