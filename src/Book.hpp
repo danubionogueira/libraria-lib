@@ -1,13 +1,29 @@
 #pragma once
 #include <string>
 #include <exception>
+#include <deque>
 
 using std::string;
 using std::exception;
+using std::deque;
 
 class EmptyBookTitleException: public exception{
 	public:
 		const char* what();
+};
+
+class MessageException: public exception{
+	private:
+		string message;
+	public:
+		const char* what();
+		string getMessage();
+		MessageException(string message);
+};
+
+class InvalidPublishingDateException: public MessageException{
+	public:
+		InvalidPublishingDateException(string message);
 };
 
 class Author{
@@ -54,6 +70,7 @@ class Author{
 		void setPopularName(const string popularName);
 
 		Author(string fullName);
+		Author(Author* author);
 };
 
 typedef enum{
@@ -92,16 +109,16 @@ class PublishingDate{
 class Book{
 	protected:
 		string title;
-		Author* author;
+		deque<Author*> authors;
 		string publisher;
 		PublishingDate* publishingDate;
 	public:
 		string getTitle();
 		void setTitle(const string title);
 
-		Author* getAuthor();
-		void setAuthor(const string author);
-		void setAuthor(Author &author);
+		void addAuthor(Author* author);
+		void removeAuthor(const size_t idx);
+		Author* getAuthor(const size_t idx);
 
 		string getPublisher();
 		void setPublisher(const string publisher);
@@ -110,7 +127,6 @@ class Book{
 		void setPublishingDate(PublishingDate &publishingDate);
 		void setPublishingDate(const int year, const nmonth month=mn_unknown, const nmday day=md_unknown);
 
-		Book(const string title, const string author);
-		Book(const string title, Author &author);
+		Book(const string title);
 		~Book();
 };

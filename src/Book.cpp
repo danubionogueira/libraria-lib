@@ -19,6 +19,21 @@ const char* EmptyBookTitleException::what(){
 	return "Book title can't be empty";
 }
 
+const char* MessageException::what(){
+	return message.c_str();
+}
+
+string MessageException::getMessage(){
+	return message;
+}
+
+MessageException::MessageException(string message){
+	this->message = message;
+}
+
+InvalidPublishingDateException::InvalidPublishingDateException(string message): MessageException(message){
+}
+
 string Author::getFullName(){
 	return fullName;
 }
@@ -188,6 +203,19 @@ Author::Author(string fullName){
 	setFullName(fullName);
 }
 
+Author::Author(Author* author){
+	fullName = author->fullName;
+	lastName = author->lastName;
+	firstName = author->firstName;
+	middleName = author->middleName;
+	abbreviatedFullName = author->abbreviatedFullName;
+	abbreviatedLastName = author->abbreviatedLastName;
+	abbreviatedFirstName = author->abbreviatedFirstName;
+	abbreviatedMiddleName = author->abbreviatedMiddleName;
+	referenceName = author->referenceName;
+	popularName = author->popularName;
+}
+
 int PublishingDate::getYear(){
 	return year;
 }
@@ -202,6 +230,7 @@ nmonth PublishingDate::getMonth(){
 
 void PublishingDate::setMonth(const nmonth month){
 	this->month = month;
+	setDay(day);
 }
 
 nmday PublishingDate::getDay(){
@@ -209,6 +238,27 @@ nmday PublishingDate::getDay(){
 }
 
 void PublishingDate::setDay(const nmday day){
+	if ((month == mn_unknown) && (day != md_unknown))
+		throw InvalidPublishingDateException("Cannot define a day for an unknow month");
+	else if (day > md_30){
+		switch (month){
+			case mn_february:
+			case mn_april:
+			case mn_june:
+			case mn_september:
+			case mn_november:
+				throw InvalidPublishingDateException("Invalid month day");
+		}
+	}
+	else if (day > md_28){
+		if (
+			(month == mn_february) &&
+			((year % 4) != 0) &&
+			((year % 400) != 0)
+		)
+			throw InvalidPublishingDateException("Invalid month day");
+	}
+
 	this->day = day;
 }
 
@@ -235,16 +285,12 @@ void Book::setTitle(const string title){
 	this->title = title;
 }
 
-Author* Book::getAuthor(){
-	return author;
+void Book::addAuthor(Author* author){
+	authors.push_back(new Author(author));
 }
 
-void Book::setAuthor(string author){
-	this->author = new Author(author);
-}
-
-void Book::setAuthor(Author &author){
-	this->author = &author;
+Author* Book::getAuthor(const size_t idx){
+	return authors[0];
 }
 
 string Book::getPublisher(){
@@ -267,14 +313,8 @@ void Book::setPublishingDate(const int year, const nmonth month, const nmday day
 	this->publishingDate = new PublishingDate(year, month, day);
 }
 
-Book::Book(const string title, const string author){
+Book::Book(const string title){
 	setTitle(title);
-	setAuthor(author);
-}
-
-Book::Book(const string title, Author &author){
-	setTitle(title);
-	setAuthor(author);
 }
 
 Book::~Book(){

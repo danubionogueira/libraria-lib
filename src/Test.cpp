@@ -24,14 +24,16 @@ void testAuthorRegular(Test* test){
 }
 
 void testBookRegular(Test* test){
-	Book* book = new Book("Test title", "Test Author");
+	Author* author = new Author("Test Author");
+	Book* book = new Book("Test title");
 	string name = "Testing regular Book";
+	book->addAuthor(author);
 
 	book->setPublisher("Some Publisher");
 	book->setPublishingDate(1999);
 
 	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
-	test(test, name, book->getAuthor()->getFullName() == "Test Author", "Book author is ok", "Book author is wrong");
+	test(test, name, book->getAuthor(0)->getFullName() == "Test Author", "Book author is ok", "Book author is wrong");
 	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
 	test(test, name, book->getPublishingDate()->getYear() == 1999, "Book publishing year ok", "Book publishing year wrong");
 	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
@@ -44,7 +46,7 @@ void testBookEmptyTitle(Test* test){
 	string name = "Testing empty title";
 
 	try{
-		Book* book = new Book("", "");
+		Book* book = new Book("");
 		testError(test, name, "Book title is wrong");
 		delete book;
 	}
