@@ -216,6 +216,26 @@ Author::Author(Author* author){
 	popularName = author->popularName;
 }
 
+void Authors::add(Author* author){
+	elements.push_back(author);
+}
+
+void Authors::insert(const size_t idx, Author* author){
+	elements.insert(elements.begin() + idx, author);
+}
+
+void Authors::remove(const size_t idx){
+	elements.erase(elements.begin() + idx);
+}
+
+Author* Authors::get(const size_t idx){
+	return elements[idx];
+}
+
+const size_t Authors::size(){
+	return elements.size();
+}
+
 int PublishingDate::getYear(){
 	return year;
 }
@@ -285,12 +305,8 @@ void Book::setTitle(const string title){
 	this->title = title;
 }
 
-void Book::addAuthor(Author* author){
-	authors.push_back(new Author(author));
-}
-
-Author* Book::getAuthor(const size_t idx){
-	return authors[0];
+Authors* Book::getAuthors(){
+	return authors;
 }
 
 string Book::getPublisher(){
@@ -314,9 +330,14 @@ void Book::setPublishingDate(const int year, const nmonth month, const nmday day
 }
 
 Book::Book(const string title){
+	authors = new Authors();
+	publishingDate = NULL;
 	setTitle(title);
 }
 
 Book::~Book(){
-	delete this->publishingDate;
+	delete authors;
+
+	if (publishingDate != NULL)
+		delete publishingDate;
 }

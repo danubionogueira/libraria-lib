@@ -73,6 +73,17 @@ class Author{
 		Author(Author* author);
 };
 
+class Authors{
+	private:
+		deque<Author*> elements;
+	public:
+		void add(Author* author);
+		void insert(const size_t idx, Author* author);
+		void remove(const size_t idx);
+		Author* get(const size_t idx);
+		const size_t size();
+};
+
 typedef enum{
 	mn_unknown,
 	mn_january, mn_february, mn_march, mn_april, mn_may, mn_june, mn_july,
@@ -109,16 +120,14 @@ class PublishingDate{
 class Book{
 	protected:
 		string title;
-		deque<Author*> authors;
+		Authors* authors;
 		string publisher;
 		PublishingDate* publishingDate;
 	public:
 		string getTitle();
 		void setTitle(const string title);
 
-		void addAuthor(Author* author);
-		void removeAuthor(const size_t idx);
-		Author* getAuthor(const size_t idx);
+		Authors* getAuthors();
 
 		string getPublisher();
 		void setPublisher(const string publisher);
