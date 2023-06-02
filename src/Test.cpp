@@ -8,6 +8,37 @@ using std::endl;
 using std::string;
 using std::to_string;
 
+void testCreationDeletion(Test* test){
+	string name = "Testing creations and deletions";
+
+	try{
+		Author* author = new Author("Author Name");
+		delete author;
+		testSuccess(test, name, "Create and delete author ok");
+	}
+	catch (exception e){
+		testError(test, name, "Create and delete author wrong");
+	}
+
+	try{
+		Authors* authors = new Authors();
+		delete authors;
+		testSuccess(test, name, "Create and delete authors ok");
+	}
+	catch (exception e){
+		testError(test, name, "Create and delete authos wrong");
+	}
+
+	try{
+		PublishingDate* publishingDate = new PublishingDate(2000);
+		delete publishingDate;
+		testSuccess(test, name, "Create and delete publishing date ok");
+	}
+	catch (exception e){
+		testError(test, name, "Create and delete publishing date wrong");
+	}
+}
+
 void testAuthorRegular(Test* test){
 	Author* author = new Author("First Middle Last");
 	string name = "Testing regular Author";
@@ -23,36 +54,56 @@ void testAuthorRegular(Test* test){
 	test(test, name, author->getReferenceName() == "LAST, F. M.", "Author reference name is ok", "Author reference name is wrong");
 }
 
-void testBookRegular(Test* test){
+void testAuthorsRegular(Test* test){
+	string name = "Testing regular Book";
+
+	Authors* authors = new Authors;
 	Author* author = new Author("Test Author");
 	Author* another = new Author("Another Author");
 	Author* intruder = new Author("Intruder Author");
 	Author* onemore = new Author("One More Author");
-	Book* book = new Book("Test title");
-	string name = "Testing regular Book";
-	book->getAuthors()->add(author);
-	book->getAuthors()->add(another);
-	book->getAuthors()->add(intruder);
 
-	book->setPublisher("Some Publisher");
-	book->setPublishingDate(1999);
+	authors->add(author);
+	authors->add(another);
+	authors->add(intruder);
 
-	book->getAuthors()->insert(1, onemore);
-	book->getAuthors()->remove(3);
+	authors->insert(1, onemore);
+	authors->remove(3);
 
-	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
-	test(test, name, book->getAuthors()->size() == 3, "Book quantity of authors is ok", "Book quantity of authors is wrong");
-	test(test, name, book->getAuthors()->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
-	test(test, name, book->getAuthors()->get(1)->getFullName() == "One More Author", "Book second author is ok", "Book second author is wrong");
-	test(test, name, book->getAuthors()->get(2)->getFullName() == "Another Author", "Book third author is ok", "Book third author is wrong");
-	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
-	test(test, name, book->getPublishingDate()->getYear() == 1999, "Book publishing year ok", "Book publishing year wrong");
-	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
-	test(test, name, book->getPublishingDate()->getDay() == md_unknown, "Book publishing day ok", "Book publishing day wrong");
+	test(test, name, authors->size() == 3, "Book quantity of authors is ok", "Book quantity of authors is wrong");
+	test(test, name, authors->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
+	test(test, name, authors->get(1)->getFullName() == "One More Author", "Book second author is ok", "Book second author is wrong");
+	test(test, name, authors->get(2)->getFullName() == "Another Author", "Book third author is ok", "Book third author is wrong");
 
 	delete author;
 	delete another;
 	delete intruder;
+	delete onemore;
+	delete authors;
+}
+
+void testBookRegular(Test* test){
+	string name = "Testing regular Book";
+
+	Author* author = new Author("Test Author");
+	Book* book = new Book("Test title");
+
+	book->getAuthors()->add(author);
+
+	book->setPublisher("Some Publisher");
+	book->setPublishingDate(1999);
+
+	book->setPublishingPlace("Some Place");
+
+	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
+	test(test, name, book->getAuthors()->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
+	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
+	test(test, name, book->getPublishingDate()->getYear() == 1999, "Book publishing year ok", "Book publishing year wrong");
+	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
+	test(test, name, book->getPublishingDate()->getDay() == md_unknown, "Book publishing day ok", "Book publishing day wrong");
+	test(test, name, book->getPublishingPlace() == "Some Place", "Book publishing place ok", "Book publishing place wrong");
+
+	delete author;
 	delete book;
 }
 
@@ -99,6 +150,7 @@ void Test::run(bool printSuccesses, bool printErrors){
 
 	cout << "Running tests..." << endl;
 
+	testCreationDeletion(this);
 	testAuthorRegular(this);
 	testBookRegular(this);
 	testBookBroken(this);

@@ -123,6 +123,7 @@ class Book{
 		Authors* authors;
 		string publisher;
 		PublishingDate* publishingDate;
+		string publishingPlace;
 	public:
 		string getTitle();
 		void setTitle(const string title);
@@ -135,6 +136,9 @@ class Book{
 		PublishingDate* getPublishingDate();
 		void setPublishingDate(PublishingDate &publishingDate);
 		void setPublishingDate(const int year, const nmonth month=mn_unknown, const nmday day=md_unknown);
+
+		string getPublishingPlace();
+		void setPublishingPlace(const string publishingPlace);
 
 		Book(const string title);
 		~Book();

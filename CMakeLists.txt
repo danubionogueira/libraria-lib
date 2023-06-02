@@ -9,6 +9,6 @@ endif ()
 
 project(libraria-lib VERSION 0.0.0.1)
 
-add_library(libraria ${LIB_TYPE} src/Book.cpp)
+add_library(libraria ${LIB_TYPE} src/Book.cpp src/Utils.cpp)
 add_executable(libraria-test src/Test.cpp src/Main.cpp)
 target_link_libraries(libraria-test libraria)

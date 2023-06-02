@@ -1,19 +1,11 @@
 #include "Book.hpp"
 #include <string>
 #include <vector>
-#include <cstring>
+#include "Utils.hpp"
 
 using std::string;
 using std::vector;
-
-string toUpper(const string str){
-	char* result = (char*)str.c_str();
-
-	for (int i=0; i<strlen(result); i++)
-		result[i] = toupper(result[i]);
-
-	return string(result);
-}
+using Utils::toUpper;
 
 const char* EmptyBookTitleException::what(){
 	return "Book title can't be empty";
@@ -327,6 +319,14 @@ void Book::setPublishingDate(PublishingDate &publishingDate){
 
 void Book::setPublishingDate(const int year, const nmonth month, const nmday day){
 	this->publishingDate = new PublishingDate(year, month, day);
+}
+
+string Book::getPublishingPlace(){
+	return publishingPlace;
+}
+
+void Book::setPublishingPlace(const string publishingPlace){
+	this->publishingPlace = publishingPlace;
 }
 
 Book::Book(const string title){
