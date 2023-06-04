@@ -12,3 +12,12 @@ string Utils::toUpper(const string str){
 
 	return string(result);
 }
+
+string Utils::toLower(const string str){
+	char* result = (char*)str.c_str();
+
+	for (int i=0; i<strlen(result); i++)
+		result[i] = tolower(result[i]);
+
+	return string(result);
+}

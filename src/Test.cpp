@@ -37,6 +37,24 @@ void testCreationDeletion(Test* test){
 	catch (exception e){
 		testError(test, name, "Create and delete publishing date wrong");
 	}
+
+	try{
+		Book* book = new Book("Test Book");
+		delete book;
+		testSuccess(test, name, "Create and delete book ok");
+	}
+	catch (exception e){
+		testError(test, name, "Create and delete book wrong");
+	}
+
+	try{
+		Books* books = new Books();
+		delete books;
+		testSuccess(test, name, "Create and delete books ok");
+	}
+	catch (exception e){
+		testError(test, name, "Create and delete books wrong");
+	}
 }
 
 void testAuthorRegular(Test* test){
@@ -95,6 +113,11 @@ void testBookRegular(Test* test){
 
 	book->setPublishingPlace("Some Place");
 
+	book->setEdition(2);
+
+	book->setISBN("1234567890");
+	book->setISBN("1234567890123");
+
 	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
 	test(test, name, book->getAuthors()->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
 	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
@@ -102,22 +125,45 @@ void testBookRegular(Test* test){
 	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
 	test(test, name, book->getPublishingDate()->getDay() == md_unknown, "Book publishing day ok", "Book publishing day wrong");
 	test(test, name, book->getPublishingPlace() == "Some Place", "Book publishing place ok", "Book publishing place wrong");
+	test(test, name, book->getEdition() == 2, "Book edition ok", "Book edition wrong");
+	test(test, name, book->getISBN10() == "1234567890", "Book ISBN10 ok", "Book ISBN10 wrong");
+	test(test, name, book->getISBN13() == "1234567890123", "Book ISBN13 ok", "Book ISBN13 wrong");
+	test(test, name, book->getISBN() == book->getISBN13(), "Book ISBN ok", "Book ISBN wrong");
 
 	delete author;
 	delete book;
 }
 
+void testBooksRegular(Test* test){
+	string name = "Testing regular Books";
+
+	Books* books = new Books;
+	Book* book = new Book("First Book");
+	Book* another = new Book("Another Book");
+	Book* intruder = new Book("Intruder Book");
+	Book* onemore = new Book("One More Book");
+
+	books->add(book);
+	books->add(another);
+	books->add(intruder);
+
+	books->insert(1, onemore);
+	books->remove(3);
+
+	test(test, name, books->size() == 3, "Books quantity is ok", "Books quantity is wrong");
+	test(test, name, books->get(0)->getTitle() == "First Book", "First book title is ok", "First book title is wrong");
+	test(test, name, books->get(1)->getTitle() == "One More Book", "Second book title is ok", "Second book title is wrong");
+	test(test, name, books->get(2)->getTitle() == "Another Book", "Third book title is ok", "Third book title is wrong");
+
+	delete book;
+	delete another;
+	delete intruder;
+	delete onemore;
+	delete books;
+}
+
 void testBookBroken(Test* test){
 	string name = "Testing empty title";
-
-	try{
-		Book* book = new Book("Testing Book");
-		delete book;
-		testSuccess(test, name, "Book deletion is ok");
-	}
-	catch (exception e){
-		testError(test, name, "Book deletion is wrong");
-	}
 
 	try{
 		Book* book = new Book("");
@@ -151,8 +197,10 @@ void Test::run(bool printSuccesses, bool printErrors){
 	cout << "Running tests..." << endl;
 
 	testCreationDeletion(this);
+	testAuthorsRegular(this);
 	testAuthorRegular(this);
 	testBookRegular(this);
+	testBooksRegular(this);
 	testBookBroken(this);
 
 	int total = successes + errors;

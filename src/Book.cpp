@@ -26,6 +26,10 @@ MessageException::MessageException(string message){
 InvalidPublishingDateException::InvalidPublishingDateException(string message): MessageException(message){
 }
 
+const char* InvalidISBNException::what(){
+	return "ISBN number is invalid";
+}
+
 string Author::getFullName(){
 	return fullName;
 }
@@ -228,6 +232,28 @@ const size_t Authors::size(){
 	return elements.size();
 }
 
+Author* Authors::search(const string lastName, const string firstName, const string middleName){
+	for (int i = 0; i<elements.size(); i++){
+		Author* author = elements[i];
+
+		string last = toUpper(lastName);
+		string first = toUpper(firstName);
+		string middle = toUpper(middleName);
+		string aLast = toUpper(author->getLastName());
+		string aFirst = toUpper(author->getFirstName());
+		string aMiddle = toUpper(author->getMiddleName());
+
+		if (
+			(aLast == last) &&
+			(aFirst == first) &&
+			(aMiddle == middle)
+		)
+			return author;
+	}
+
+	return NULL;
+}
+
 int PublishingDate::getYear(){
 	return year;
 }
@@ -329,6 +355,48 @@ void Book::setPublishingPlace(const string publishingPlace){
 	this->publishingPlace = publishingPlace;
 }
 
+unsigned short int Book::getEdition(){
+	return edition;
+}
+
+void Book::setEdition(const unsigned short int edition){
+	this->edition = edition;
+}
+
+string Book::getISBN10(){
+	return isbn10;
+}
+
+void Book::setISBN10(const string isbn10){
+	this->isbn10 = isbn10;
+}
+
+string Book::getISBN13(){
+	return isbn13;
+}
+
+void Book::setISBN13(const string isbn13){
+	this->isbn13 = isbn13;
+}
+
+string Book::getISBN(){
+	if (isbn13 != "")
+		return getISBN13();
+	else if (isbn10 != "")
+		return getISBN10();
+
+	return "";
+}
+
+void Book::setISBN(const string isbn){
+	if (isbn.size() == 13)
+		setISBN13(isbn);
+	else if (isbn.size() == 10)
+		setISBN10(isbn);
+	else
+		throw InvalidISBNException();
+}
+
 Book::Book(const string title){
 	authors = new Authors();
 	publishingDate = NULL;
@@ -340,4 +408,24 @@ Book::~Book(){
 
 	if (publishingDate != NULL)
 		delete publishingDate;
+}
+
+void Books::add(Book* book){
+	elements.push_back(book);
+}
+
+void Books::insert(const size_t idx, Book* book){
+	elements.insert(elements.begin() + idx, book);
+}
+
+void Books::remove(const size_t idx){
+	elements.erase(elements.begin() + idx);
+}
+
+Book* Books::get(const size_t idx){
+	return elements[idx];
+}
+
+const size_t Books::size(){
+	return elements.size();
 }

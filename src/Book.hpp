@@ -26,6 +26,11 @@ class InvalidPublishingDateException: public MessageException{
 		InvalidPublishingDateException(string message);
 };
 
+class InvalidISBNException: public exception{
+	public:
+		const char* what();
+};
+
 class Author{
 	private:
 		string fullName;
@@ -82,6 +87,8 @@ class Authors{
 		void remove(const size_t idx);
 		Author* get(const size_t idx);
 		const size_t size();
+
+		Author* search(const string lastName, const string firstName, const string middleName = "");
 };
 
 typedef enum{
@@ -124,6 +131,9 @@ class Book{
 		string publisher;
 		PublishingDate* publishingDate;
 		string publishingPlace;
+		unsigned short int edition;
+		string isbn10;
+		string isbn13;
 	public:
 		string getTitle();
 		void setTitle(const string title);
@@ -140,6 +150,29 @@ class Book{
 		string getPublishingPlace();
 		void setPublishingPlace(const string publishingPlace);
 
+		unsigned short int getEdition();
+		void setEdition(const unsigned short int edition);
+
+		string getISBN10();
+		void setISBN10(const string isbn10);
+
+		string getISBN13();
+		void setISBN13(const string isbn13);
+
+		string getISBN();
+		void setISBN(const string isbn);
+
 		Book(const string title);
 		~Book();
+};
+
+class Books{
+	private:
+		deque<Book*> elements;
+	public:
+		void add(Book* author);
+		void insert(const size_t idx, Book* book);
+		void remove(const size_t idx);
+		Book* get(const size_t idx);
+		const size_t size();
 };
