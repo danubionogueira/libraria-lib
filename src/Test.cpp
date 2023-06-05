@@ -73,7 +73,7 @@ void testAuthorRegular(Test* test){
 }
 
 void testAuthorsRegular(Test* test){
-	string name = "Testing regular Book";
+	string name = "Testing regular Authors";
 
 	Authors* authors = new Authors;
 	Author* author = new Author("Test Author");
@@ -97,6 +97,37 @@ void testAuthorsRegular(Test* test){
 	delete another;
 	delete intruder;
 	delete onemore;
+	delete authors;
+}
+
+void testAuthorsSearch(Test* test){
+	string name = "Testing Authors Search";
+	Authors* authors = new Authors();
+
+	Author* first = new Author("First Middle Last");
+	Author* second = new Author("Second Middle Last");
+	Author* third = new Author("Third Mid Las");
+	Author* result = NULL;
+
+	authors->add(first);
+	authors->add(second);
+	authors->add(third);
+
+	result = authors->search("Last", "First", "M.");
+	test(test, name, result->getFullName() == first->getFullName(), "Search first author ok", "Search first author wrong");
+
+	result = authors->search("Last", "S.", "M.");
+	test(test, name, result->getFullName() == second->getFullName(), "Search second author ok", "Search second author wrong");
+
+	result = authors->search("Las", "Third", "Mid");
+	test(test, name, result->getFullName() == third->getFullName(), "Search third author ok", "Search third author wrong");
+
+	result = authors->search("Last", "Third", "Middle");
+	test(test, name, result == NULL, "Search invalid author ok", "Search invalid author wrong");
+
+	delete first;
+	delete second;
+	delete third;
 	delete authors;
 }
 
@@ -162,6 +193,38 @@ void testBooksRegular(Test* test){
 	delete books;
 }
 
+void testBooksSearch(Test* test){
+	string name = "Testing Books search";
+	Books* books = new Books();
+
+	Author* firstA = new Author("First Middle Last");
+	Author* secondA = new Author("Second Middle Last");
+
+	Book* firstB = new Book("First Book");
+	Book* secondB = new Book("Second Book");
+	Book* result = NULL;
+
+	firstB->getAuthors()->add(firstA);
+	secondB->getAuthors()->add(secondA);
+	books->add(firstB);
+	books->add(secondB);
+
+	result = books->search(firstA, "First Book");
+	test(test, name, result->getTitle() == firstB->getTitle(), "Search first book ok", "Search first book wrong");
+
+	result = books->search(secondA, "Second Book");
+	test(test, name, result->getTitle() == secondB->getTitle(), "Search second book ok", "Search second book wrong");
+
+	result = books->search(secondA, "First Book");
+	test(test, name, result == NULL, "Search invalid book ok", "Search invalid book wrong");
+
+	delete firstA;
+	delete secondA;
+	delete firstB;
+	delete secondB;
+	delete books;
+}
+
 void testBookBroken(Test* test){
 	string name = "Testing empty title";
 
@@ -197,11 +260,13 @@ void Test::run(bool printSuccesses, bool printErrors){
 	cout << "Running tests..." << endl;
 
 	testCreationDeletion(this);
-	testAuthorsRegular(this);
 	testAuthorRegular(this);
+	testAuthorsRegular(this);
+	testAuthorsSearch(this);
 	testBookRegular(this);
-	testBooksRegular(this);
 	testBookBroken(this);
+	testBooksRegular(this);
+	testBooksSearch(this);
 
 	int total = successes + errors;
 

@@ -175,4 +175,7 @@ class Books{
 		void remove(const size_t idx);
 		Book* get(const size_t idx);
 		const size_t size();
+
+		Book* search(const Author* author, const string title);
+		Book* search(const string isbn);
 };

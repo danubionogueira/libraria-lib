@@ -242,11 +242,19 @@ Author* Authors::search(const string lastName, const string firstName, const str
 		string aLast = toUpper(author->getLastName());
 		string aFirst = toUpper(author->getFirstName());
 		string aMiddle = toUpper(author->getMiddleName());
+		string bFirst = toUpper(author->getAbbreviatedFirstName());
+		string bMiddle = toUpper(author->getAbbreviatedMiddleName());
 
 		if (
-			(aLast == last) &&
-			(aFirst == first) &&
-			(aMiddle == middle)
+			(last == aLast) &&
+			(
+				(first == aFirst) ||
+				(first == bFirst)
+			) &&
+			(
+				(middle == aMiddle) ||
+				(middle == bMiddle)
+			)
 		)
 			return author;
 	}
@@ -428,4 +436,35 @@ Book* Books::get(const size_t idx){
 
 const size_t Books::size(){
 	return elements.size();
+}
+
+Book* Books::search(const Author* author, const string title){
+	for (int i=0; i<elements.size(); i++){
+		Book* book = elements[i];
+		Authors* authors = book->getAuthors();
+
+		for (int j=0; j<authors->size(); j++){
+			if (
+				(authors->get(j) == author) &&
+				(toUpper(book->getTitle()) == toUpper(title))
+			)
+				return book;
+		}
+	}
+
+	return NULL;
+}
+
+Book* Books::search(const string isbn){
+	for (int i=0; i<elements.size(); i++){
+		Book* book = elements[i];
+
+		if (
+			(book->getISBN13() == isbn) ||
+			(book->getISBN10() == isbn)
+		)
+			return book;
+	}
+
+	return NULL;
 }
