@@ -89,9 +89,9 @@ void testAuthorsRegular(Test* test){
 	authors->remove(3);
 
 	test(test, name, authors->size() == 3, "Book quantity of authors is ok", "Book quantity of authors is wrong");
-	test(test, name, authors->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
-	test(test, name, authors->get(1)->getFullName() == "One More Author", "Book second author is ok", "Book second author is wrong");
-	test(test, name, authors->get(2)->getFullName() == "Another Author", "Book third author is ok", "Book third author is wrong");
+	test(test, name, authors->at(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
+	test(test, name, authors->at(1)->getFullName() == "One More Author", "Book second author is ok", "Book second author is wrong");
+	test(test, name, authors->at(2)->getFullName() == "Another Author", "Book third author is ok", "Book third author is wrong");
 
 	delete author;
 	delete another;
@@ -150,7 +150,7 @@ void testBookRegular(Test* test){
 	book->setISBN("1234567890123");
 
 	test(test, name, book->getTitle() == "Test title", "Book title is ok", "Book title is wrong");
-	test(test, name, book->getAuthors()->get(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
+	test(test, name, book->getAuthors()->at(0)->getFullName() == "Test Author", "Book first author is ok", "Book first author is wrong");
 	test(test, name, book->getPublisher() == "Some Publisher", "Book publisher is ok", "Book publisher is wrong");
 	test(test, name, book->getPublishingDate()->getYear() == 1999, "Book publishing year ok", "Book publishing year wrong");
 	test(test, name, book->getPublishingDate()->getMonth() == mn_unknown, "Book publishing month ok", "Book publishing month wrong");
@@ -182,9 +182,9 @@ void testBooksRegular(Test* test){
 	books->remove(3);
 
 	test(test, name, books->size() == 3, "Books quantity is ok", "Books quantity is wrong");
-	test(test, name, books->get(0)->getTitle() == "First Book", "First book title is ok", "First book title is wrong");
-	test(test, name, books->get(1)->getTitle() == "One More Book", "Second book title is ok", "Second book title is wrong");
-	test(test, name, books->get(2)->getTitle() == "Another Book", "Third book title is ok", "Third book title is wrong");
+	test(test, name, books->at(0)->getTitle() == "First Book", "First book title is ok", "First book title is wrong");
+	test(test, name, books->at(1)->getTitle() == "One More Book", "Second book title is ok", "Second book title is wrong");
+	test(test, name, books->at(2)->getTitle() == "Another Book", "Third book title is ok", "Third book title is wrong");
 
 	delete book;
 	delete another;
@@ -206,6 +206,7 @@ void testBooksSearch(Test* test){
 
 	firstB->getAuthors()->add(firstA);
 	secondB->getAuthors()->add(secondA);
+
 	books->add(firstB);
 	books->add(secondB);
 
@@ -217,6 +218,18 @@ void testBooksSearch(Test* test){
 
 	result = books->search(secondA, "First Book");
 	test(test, name, result == NULL, "Search invalid book ok", "Search invalid book wrong");
+
+	firstB->setISBN("1234567890123");
+	secondB->setISBN("1234567890");
+
+	result = books->search("1234567890123");
+	test(test, name, result->getTitle() == firstB->getTitle(), "Search first book ISBN ok", "Search first book ISBN wrong");
+
+	result = books->search("1234567890");
+	test(test, name, result->getTitle() == secondB->getTitle(), "Search second book ISBN ok", "Search second book ISBN wrong");
+
+	result = books->search("3210987654321");
+	test(test, name, result == NULL, "Search invalid book ISBN ok", "Search invalid book ISBN wrong");
 
 	delete firstA;
 	delete secondA;

@@ -224,7 +224,7 @@ void Authors::remove(const size_t idx){
 	elements.erase(elements.begin() + idx);
 }
 
-Author* Authors::get(const size_t idx){
+Author* Authors::at(const size_t idx){
 	return elements[idx];
 }
 
@@ -430,7 +430,7 @@ void Books::remove(const size_t idx){
 	elements.erase(elements.begin() + idx);
 }
 
-Book* Books::get(const size_t idx){
+Book* Books::at(const size_t idx){
 	return elements[idx];
 }
 
@@ -445,7 +445,7 @@ Book* Books::search(const Author* author, const string title){
 
 		for (int j=0; j<authors->size(); j++){
 			if (
-				(authors->get(j) == author) &&
+				(authors->at(j) == author) &&
 				(toUpper(book->getTitle()) == toUpper(title))
 			)
 				return book;

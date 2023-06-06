@@ -85,7 +85,7 @@ class Authors{
 		void add(Author* author);
 		void insert(const size_t idx, Author* author);
 		void remove(const size_t idx);
-		Author* get(const size_t idx);
+		Author* at(const size_t idx);
 		const size_t size();
 
 		Author* search(const string lastName, const string firstName, const string middleName = "");
@@ -173,7 +173,7 @@ class Books{
 		void add(Book* author);
 		void insert(const size_t idx, Book* book);
 		void remove(const size_t idx);
-		Book* get(const size_t idx);
+		Book* at(const size_t idx);
 		const size_t size();
 
 		Book* search(const Author* author, const string title);
