@@ -96,6 +96,10 @@ void DatabaseImpl::Connect()
 	std::string connect;
 	if (! mServerName.empty())
 		connect.assign(mServerName).append(":");
+	//[
+	else
+		dpb.Insert(isc_dpb_config, "Providers = Engine12");
+	//]
 	connect.append(mDatabaseName);
 
 	IBS status;

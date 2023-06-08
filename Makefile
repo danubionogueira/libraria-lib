@@ -22,6 +22,9 @@ config: $(BULD_DIR)
 	cmake -E chdir build cmake ..
 
 clean:
+	cmake --clean build
+
+remove:
 	-rm -rf build
 
-.PHONY: $(APP) debug config config-debug config-release clean
+.PHONY: $(APP) debug config config-debug config-release remove clean
