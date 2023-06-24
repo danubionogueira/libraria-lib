@@ -60,9 +60,94 @@ Database::Database(Server* server, const string path, User* user){
         "", "", "PAGE_SIZE = 4096");
 }
 
+Database* Transaction::getDatabase(){
+	return database;
+}
+
 Transaction::Transaction(Database* database){
 	this->database = database;
 
 	ibtr = IBPP::TransactionFactory(database->ibdb, IBPP::amWrite,
                    IBPP::ilReadCommitted, IBPP::lrNoWait, IBPP::TFF(0));
+}
+
+Transaction* Statement::getTransaction(){
+	return transaction;
+}
+
+Statement::Statement(Transaction* transaction){
+	this->transaction = transaction;
+
+	ibst = IBPP::StatementFactory(
+		transaction->database->ibdb,
+		transaction->ibtr
+	);
+}
+
+string ColumnMetaData::getType(){
+	return type;
+}
+
+string ColumnMetaData::getName(){
+	return name;
+}
+
+unsigned int ColumnMetaData::getLength(){
+	return length;
+}
+
+ColumnMetaData::ColumnMetaData(const string type, const string name, unsigned int length){
+	this->type = type;
+	this->name = name;
+	this->length = length;
+}
+
+string TableMetadata::getName(){
+	return name;
+}
+
+TableMetadata::TableMetadata(string name){
+	this->name = name;
+}
+
+TableMetadata* Column::getTable(){
+	return table;
+}
+
+int Column::getAsInteger(){
+	int result;
+	statement->ibst->Get(getName(), result);
+	return result;
+}
+
+string Column::getAsString(){
+	string result;
+	statement->ibst->Get(getName(), result);
+	return result;
+}
+
+Column::Column(
+	TableMetadata* table,
+	const string type,
+	const string name,
+	const unsigned int length
+): ColumnMetaData(type, name, length){
+	this->table = table;
+}
+
+VarcharColumn::VarcharColumn(
+	TableMetadata* table,
+	const string name,
+	unsigned int length
+): Column(table, "VARCHAR", name, length){
+}
+
+IntegerColumn::IntegerColumn(TableMetadata* table, const string name):
+	Column(table, "INTEGER", name, 0){
+}
+
+AutoIncrementColumn::AutoIncrementColumn(
+	TableMetadata* table,
+	const string name
+): Column(table, "AUTOINCREMENT", name, 0){
 }

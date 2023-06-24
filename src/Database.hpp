@@ -42,6 +42,7 @@ class Database{
 		Database(Server* server, const string path, User* user);
 
 		friend class Transaction;
+		friend class Statement;
 };
 
 class Transaction{
@@ -49,7 +50,26 @@ class Transaction{
 		IBPP::Transaction ibtr;
 		Database* database;
 	public:
+		Database* getDatabase();
+
 		Transaction(Database* database);
+
+		friend class Statement;
+};
+
+class Statement{
+	private:
+		IBPP::Statement ibst;
+		Transaction* transaction;
+	public:
+		Transaction* getTransaction();
+
+		Statement(Transaction* transaction);
+
+		friend class Column;
+		friend class VarcharColumn;
+		friend class IntegerColumn;
+		friend class AutoIncrementColumn;
 };
 
 class ColumnMetaData{
@@ -75,15 +95,17 @@ class TableMetadata{
 };
 
 class Column: public ColumnMetaData{
+	private:
+		ColumnMetaData* metadata;
+		TableMetadata* table;
+		Statement* statement;
 	public:
 		TableMetadata* getTable();
 
-		int getAsInt();
-		unsigned int getAsUInt();
+		int getAsInteger();
 		string getAsString();
 
-		void setAsInt(const int value);
-		void setAsUInt(const unsigned int value);
+		void setAsInteger(const int value);
 		void setAsString(const string value);
 
 		Column(
@@ -95,18 +117,16 @@ class Column: public ColumnMetaData{
 };
 
 class VarcharColumn: public Column{
-	private:
-		unsigned int length;
 	public:
 		VarcharColumn(TableMetadata* table, const string name, unsigned int length);
 };
 
-class IntColumn: public Column{
+class IntegerColumn: public Column{
 	public:
-		IntColumn(TableMetadata* table, const string name);
+		IntegerColumn(TableMetadata* table, const string name);
 };
 
-class AutoIncrementColumn: public IntColumn{
+class AutoIncrementColumn: public Column{
 	public:
 		AutoIncrementColumn(TableMetadata* table, const string name);
 };
