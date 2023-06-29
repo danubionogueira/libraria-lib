@@ -1,9 +1,27 @@
 #include "../ibpp/ibpp.h"
 #include <string>
 #include <deque>
+#include <exception>
 
 using std::string;
 using std::deque;
+using std::exception;
+
+class SQLException: public exception{
+	private:
+		int code;
+		string message;
+	public:
+		int getCode();
+		const char* what();
+
+		SQLException(int code, const char* what);
+};
+
+class InvalidTableException: public exception{
+	public:
+		const char* what();
+};
 
 class User{
 	private:
@@ -39,7 +57,15 @@ class Database{
 		string getPath();
 		User* getUser();
 
+		void create();
+		void drop();
+		void recreate();
+		void connect();
+		void disconnect();
+		bool connected();
+
 		Database(Server* server, const string path, User* user);
+		~Database();
 
 		friend class Transaction;
 		friend class Statement;
@@ -51,6 +77,11 @@ class Transaction{
 		Database* database;
 	public:
 		Database* getDatabase();
+
+		void start();
+		void commit();
+		void rollback();
+		bool started();
 
 		Transaction(Database* database);
 
@@ -64,12 +95,12 @@ class Statement{
 	public:
 		Transaction* getTransaction();
 
-		Statement(Transaction* transaction);
+		void executeSQL(const string sql);
 
-		friend class Column;
-		friend class VarcharColumn;
-		friend class IntegerColumn;
-		friend class AutoIncrementColumn;
+		int getColumnAsInt(const string name);
+		string getColumnAsString(const string name);
+
+		Statement(Transaction* transaction);
 };
 
 class ColumnMetaData{
@@ -92,6 +123,7 @@ class TableMetadata{
 		string getName();
 
 		TableMetadata(const string name);
+		virtual ~TableMetadata();
 };
 
 class Column: public ColumnMetaData{
@@ -126,24 +158,28 @@ class IntegerColumn: public Column{
 		IntegerColumn(TableMetadata* table, const string name);
 };
 
-class AutoIncrementColumn: public Column{
+class IdentifierColumn: public Column{
 	public:
-		AutoIncrementColumn(TableMetadata* table, const string name);
+		IdentifierColumn(TableMetadata* table, const string name);
 };
 
 class PrimaryKey{
 	private:
 		string name;
 		deque<Column*> columns;
+		TableMetadata* table;
 	public:
+		TableMetadata* getTable();
 		string getName();
 
-		void addColumn(Column* column);
+		void add(Column* column);
+		Column* at(const size_t idx);
+		const size_t size();
 
-		void create();
-		void drop();
+		void create(Transaction* transaction);
+		void drop(Transaction* transaction);
 
-		PrimaryKey(const string name = "");
+		PrimaryKey(TableMetadata* table, const string name = "");
 };
 
 class ForeignKeyReference{
@@ -161,24 +197,42 @@ class ForeignKey{
 	private:
 		string name;
 		deque<ForeignKeyReference*> references;
+		TableMetadata* table;
 	public:
+		TableMetadata* getTable();
 		string getName();
 
-		void addReference(ForeignKeyReference* reference);
+		void add(ForeignKeyReference* reference);
+		ForeignKeyReference* at(const size_t idx);
+		const size_t size();
 
-		ForeignKey(const string name = "");
+		void create();
+		void drop();
+
+		ForeignKey(TableMetadata* table, const string name = "");
 };
 
 class Table: public TableMetadata{
 	private:
-		deque<ColumnMetaData*> columns;
+		deque<Column*> columns;
 		PrimaryKey* primaryKey;
 		deque<ForeignKey*> foreignKeys;
 	public:
-		void addColumn(ColumnMetaData* column);
+		void addColumn(Column* column);
+
 		void setPrimaryKey(PrimaryKey* primaryKey);
 		void addForeignKey(ForeignKey* foreignKey);
 
-		void create();
-		void drop();
+		Column* columnAt(const size_t idx);
+		const size_t columnsSize();
+
+		PrimaryKey* getPrimaryKey();
+
+		ForeignKey* foreignKeyAt(const size_t idx);
+		const size_t foreignKeysSize();
+
+		void create(Transaction* transaction);
+		void drop(Transaction* transaction);
+
+		Table(const string name);
 };

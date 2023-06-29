@@ -1,5 +1,6 @@
 #include "Test.hpp"
 #include "Book.hpp"
+#include "Database.hpp"
 #include <iostream>
 #include <string>
 
@@ -252,6 +253,42 @@ void testBookBroken(Test* test){
 	}
 }
 
+void testDatabase(Test* test){
+	string name = "Testing database";
+	User* dba = new User("SYSDBA", "masterkey");
+	Server* srv = new Server("localhost");
+	Database* db = new Database(srv, "/var/firebird/libraria.fdb", dba);
+	Transaction* tr = new Transaction(db);
+
+	Table* author = new Table("author");
+	Column* authorId = new IdentifierColumn(author, "id");
+	Column* authorLastName = new VarcharColumn(author, "last_name", 255);
+	Column* authorFirstName = new VarcharColumn(author, "first_name", 255);
+	Column* authorMiddleName = new VarcharColumn(author, "middle_name", 255);
+	PrimaryKey* authorPK = new PrimaryKey(author, "author_pk");
+
+	/*
+	author->addColumn(authorId);
+	author->addColumn(authorLastName);
+	author->addColumn(authorFirstName);
+	author->addColumn(authorMiddleName);
+	*/
+	authorPK->add(authorId);
+	//author->setPrimaryKey(authorPK);
+
+	db->recreate();
+	testSuccess(test, name, "Recreated database");
+
+	db->connect();
+	testSuccess(test, name, "Connected database");
+
+	author->create(tr);
+	testSuccess(test, name, "Created author table");
+
+	db->drop();
+	testSuccess(test, name, "Dropped database");
+}
+
 void Test::addSuccess(string testName, string testFile, unsigned int fileLine, string message){
 	successes += 1;
 
@@ -280,6 +317,7 @@ void Test::run(bool printSuccesses, bool printErrors){
 	testBookBroken(this);
 	testBooksRegular(this);
 	testBooksSearch(this);
+	testDatabase(this);
 
 	int total = successes + errors;
 

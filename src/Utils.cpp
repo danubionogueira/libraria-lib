@@ -21,3 +21,11 @@ string Utils::toLower(const string str){
 
 	return string(result);
 }
+
+string Utils::toString(const int num){
+	return std::to_string(num);
+}
+
+string Utils::toString(const unsigned int num){
+	return std::to_string(num);
+}
