@@ -246,10 +246,10 @@ Column::Column(
 ): ColumnMetaData(type, name, length){
 	this->table = table;
 
-	if (dynamic_cast<Table*>(table) != nullptr){
-		Table* tb = (Table*)table;
+	Table* tb = dynamic_cast<Table*>(table);
+
+	if (tb != nullptr)
 		tb->addColumn(this);
-	}
 }
 
 VarcharColumn::VarcharColumn(
@@ -332,10 +332,10 @@ PrimaryKey::PrimaryKey(TableMetadata* table, const string name){
 	this->name = name;
 	this->table = table;
 
-	if (dynamic_cast<Table*>(table) != nullptr){
-		Table* tb = (Table*)table;
+	Table* tb = dynamic_cast<Table*>(table);
+
+	if (tb != nullptr)
 		tb->setPrimaryKey(this);
-	}
 }
 
 Column* ForeignKeyReference::getColumn(){
@@ -362,8 +362,14 @@ string ForeignKey::getName(){
 void ForeignKey::add(ForeignKeyReference* reference){
 	if (table != reference->getColumn()->getTable())
 		throw InvalidTableException();
+	else if (this->reference != reference->getReference()->getTable())
+		throw InvalidTableException();
 
 	references.push_back(reference);
+}
+
+void ForeignKey::add(Column* column, Column* reference){
+	add(new ForeignKeyReference(column, reference));
 }
 
 ForeignKeyReference* ForeignKey::at(const size_t idx){
@@ -374,20 +380,43 @@ const size_t ForeignKey::size(){
 	return references.size();
 }
 
-void ForeignKey::create(){
+void ForeignKey::create(Transaction* transaction){
+	Statement* stmt = new Statement(transaction);
+	size_t size = references.size();
+	string sql = "ALTER TABLE " + getTable()->getName() + " ADD CONSTRAINT " + name + " FOREIGN KEY(\n";
+	string reftable;
+
+	for (size_t i=0; i<size; i++){
+		ForeignKeyReference* reference = references.at(i);
+		sql = sql + "\t" + reference->getColumn()->getName();
+	}
+
+	sql = sql + "\n) REFERENCES " + reference->getName() + "(\n";
+
+	for (size_t i=0; i<size; i++){
+		ForeignKeyReference* reference = references.at(i);
+		sql = sql + "\t" + reference->getReference()->getName();
+	}
+
+	sql = sql + "\n);";
+	stmt->executeSQL(sql);
 }
 
-void ForeignKey::drop(){
+void ForeignKey::drop(Transaction* transaction){
+	Statement* stmt = new Statement(transaction);
+	string sql = "ALTER TABLE " + getTable()->getName() + " DROP CONSTRAINT " + name + ";";
+	stmt->executeSQL(sql);
 }
 
-ForeignKey::ForeignKey(TableMetadata* table, const string name){
+ForeignKey::ForeignKey(TableMetadata* table, TableMetadata* reference, const string name){
 	this->name = name;
 	this->table = table;
+	this->reference = reference;
 
-	if (dynamic_cast<Table*>(table) != nullptr){
-		Table* tb = (Table*)table;
+	Table* tb = dynamic_cast<Table*>(table);
+
+	if (tb != nullptr)
 		tb->addForeignKey(this);
-	}
 }
 
 void Table::addColumn(Column* column){
@@ -405,7 +434,7 @@ void Table::setPrimaryKey(PrimaryKey* primaryKey){
 }
 
 void Table::addForeignKey(ForeignKey* foreignKey){
-	if (foreignKey->at(0)->getColumn()->getTable() != this)
+	if (foreignKey->getTable() != this)
 		throw InvalidTableException();
 
 	foreignKeys.push_back(foreignKey);
@@ -456,6 +485,11 @@ void Table::create(Transaction* transaction){
 
 	if (primaryKey != NULL)
 		primaryKey->create(transaction);
+
+	for (size_t i=0; i<foreignKeys.size(); i++){
+		ForeignKey* foreignKey = foreignKeys.at(i);
+		foreignKey->create(transaction);
+	}
 }
 
 void Table::drop(Transaction* transaction){

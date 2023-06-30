@@ -262,31 +262,48 @@ void testDatabase(Test* test){
 
 	Table* author = new Table("author");
 	Column* authorId = new IdentifierColumn(author, "id");
-	Column* authorLastName = new VarcharColumn(author, "last_name", 255);
-	Column* authorFirstName = new VarcharColumn(author, "first_name", 255);
-	Column* authorMiddleName = new VarcharColumn(author, "middle_name", 255);
+	Column* authorLastName = new VarcharColumn(author, "last_name", 127);
+	Column* authorFirstName = new VarcharColumn(author, "first_name", 127);
+	Column* authorMiddleName = new VarcharColumn(author, "middle_name", 127);
+	Column* authorLastNameAbbreviation = new VarcharColumn(author, "last_name_abbreviation", 127);
+	Column* authorFirstNameAbbreviation = new VarcharColumn(author, "first_name_abbreviation", 127);
+	Column* authorMiddleNameAbbreviation = new VarcharColumn(author, "middle_name_abbreviation", 127);
 	PrimaryKey* authorPK = new PrimaryKey(author, "author_pk");
 
-	/*
-	author->addColumn(authorId);
-	author->addColumn(authorLastName);
-	author->addColumn(authorFirstName);
-	author->addColumn(authorMiddleName);
-	*/
+	Table* book = new Table("book");
+	Column* bookId = new IdentifierColumn(book, "id");
+	Column* bookTitle = new VarcharColumn(book, "title", 255);
+	PrimaryKey* bookPK = new PrimaryKey(book, "book_pk");
+
+	Table* bookAuthor = new Table("book_author");
+	Column* bookAuthorBookId = new IntegerColumn(bookAuthor, "book_id");
+	Column* bookAuthorAuthorId = new IntegerColumn(bookAuthor, "author_id");
+	ForeignKey* bookAuthorBookFK = new ForeignKey(bookAuthor, book, "book_author_book_fk");
+	ForeignKey* bookAuthorAuthorFK = new ForeignKey(bookAuthor, author, "book_author_author_fk");
+
 	authorPK->add(authorId);
-	//author->setPrimaryKey(authorPK);
+	bookPK->add(bookId);
+
+	bookAuthorBookFK->add(bookAuthorBookId, bookId);
+	bookAuthorAuthorFK->add(bookAuthorAuthorId, authorId);
 
 	db->recreate();
-	testSuccess(test, name, "Recreated database");
+	testSuccess(test, name, "Recreated Libraria database");
 
 	db->connect();
-	testSuccess(test, name, "Connected database");
+	testSuccess(test, name, "Connected Kibraria database");
 
 	author->create(tr);
-	testSuccess(test, name, "Created author table");
+	testSuccess(test, name, "Created Author table");
+
+	book->create(tr);
+	testSuccess(test, name, "Created Book table");
+
+	bookAuthor->create(tr);
+	testSuccess(test, name, "Created Book Author table");
 
 	db->drop();
-	testSuccess(test, name, "Dropped database");
+	testSuccess(test, name, "Dropped Libraria database");
 }
 
 void Test::addSuccess(string testName, string testFile, unsigned int fileLine, string message){

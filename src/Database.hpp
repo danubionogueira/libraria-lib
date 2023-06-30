@@ -198,18 +198,21 @@ class ForeignKey{
 		string name;
 		deque<ForeignKeyReference*> references;
 		TableMetadata* table;
+		TableMetadata* reference;
 	public:
 		TableMetadata* getTable();
+		TableMetadata* getReference();
 		string getName();
 
 		void add(ForeignKeyReference* reference);
+		void add(Column* column, Column* reference);
 		ForeignKeyReference* at(const size_t idx);
 		const size_t size();
 
-		void create();
-		void drop();
+		void create(Transaction* transaction);
+		void drop(Transaction* transaction);
 
-		ForeignKey(TableMetadata* table, const string name = "");
+		ForeignKey(TableMetadata* table, TableMetadata* reference, const string name = "");
 };
 
 class Table: public TableMetadata{
