@@ -261,8 +261,8 @@ void testDatabase(Test* test){
 	Transaction* tr = new Transaction(db);
 
 	Table* author = new Table("author");
-	Column* authorId = new IdentifierColumn(author, "id");
-	Column* authorLastName = new VarcharColumn(author, "last_name", 127);
+	Column* authorId = new IdentifierColumn(author, "id", true);
+	Column* authorLastName = new VarcharColumn(author, "last_name", 127, true);
 	Column* authorFirstName = new VarcharColumn(author, "first_name", 127);
 	Column* authorMiddleName = new VarcharColumn(author, "middle_name", 127);
 	Column* authorLastNameAbbreviation = new VarcharColumn(author, "last_name_abbreviation", 127);
@@ -271,18 +271,21 @@ void testDatabase(Test* test){
 	PrimaryKey* authorPK = new PrimaryKey(author, "author_pk");
 
 	Table* book = new Table("book");
-	Column* bookId = new IdentifierColumn(book, "id");
-	Column* bookTitle = new VarcharColumn(book, "title", 255);
+	Column* bookId = new IdentifierColumn(book, "id", true);
+	Column* bookTitle = new VarcharColumn(book, "title", 255, true);
 	PrimaryKey* bookPK = new PrimaryKey(book, "book_pk");
 
 	Table* bookAuthor = new Table("book_author");
-	Column* bookAuthorBookId = new IntegerColumn(bookAuthor, "book_id");
-	Column* bookAuthorAuthorId = new IntegerColumn(bookAuthor, "author_id");
+	Column* bookAuthorBookId = new IntegerColumn(bookAuthor, "book_id", true);
+	Column* bookAuthorAuthorId = new IntegerColumn(bookAuthor, "author_id", true);
+	PrimaryKey* bookAuthorPK = new PrimaryKey(bookAuthor, "book_author_pk");
 	ForeignKey* bookAuthorBookFK = new ForeignKey(bookAuthor, book, "book_author_book_fk");
 	ForeignKey* bookAuthorAuthorFK = new ForeignKey(bookAuthor, author, "book_author_author_fk");
 
 	authorPK->add(authorId);
 	bookPK->add(bookId);
+	bookAuthorPK->add(bookAuthorBookId);
+	bookAuthorPK->add(bookAuthorAuthorId);
 
 	bookAuthorBookFK->add(bookAuthorBookId, bookId);
 	bookAuthorAuthorFK->add(bookAuthorAuthorId, authorId);
@@ -291,7 +294,7 @@ void testDatabase(Test* test){
 	testSuccess(test, name, "Recreated Libraria database");
 
 	db->connect();
-	testSuccess(test, name, "Connected Kibraria database");
+	testSuccess(test, name, "Connected Libraria database");
 
 	author->create(tr);
 	testSuccess(test, name, "Created Author table");
@@ -301,6 +304,20 @@ void testDatabase(Test* test){
 
 	bookAuthor->create(tr);
 	testSuccess(test, name, "Created Book Author table");
+
+	bookAuthorBookFK->drop(tr);
+	bookAuthorAuthorFK->drop(tr);
+	testSuccess(test, name, "Dropped all foreign keys");
+
+	bookAuthorPK->drop(tr);
+	bookPK->drop(tr);
+	authorPK->drop(tr);
+	testSuccess(test, name, "Dropped all primary keys");
+
+	bookAuthor->drop(tr);
+	book->drop(tr);
+	author->drop(tr);
+	testSuccess(test, name, "Dropped all tables");
 
 	db->drop();
 	testSuccess(test, name, "Dropped Libraria database");

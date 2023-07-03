@@ -108,12 +108,19 @@ class ColumnMetaData{
 		string type;
 		string name;
 		unsigned int length;
+		bool notNull;
 	public:
 		string getType();
 		string getName();
 		unsigned int getLength();
+		bool getNotNull();
 
-		ColumnMetaData(const string type, const string name, unsigned int length = 0);
+		ColumnMetaData(
+			const string type,
+			const string name,
+			const unsigned int length = 0,
+			const bool notNull = false
+		);
 };
 
 class TableMetadata{
@@ -144,23 +151,37 @@ class Column: public ColumnMetaData{
 			TableMetadata* table,
 			const string type,
 			const string name,
-			const unsigned int length = 0
+			const unsigned int length = 0,
+			const bool notNull = false
 		);
 };
 
 class VarcharColumn: public Column{
 	public:
-		VarcharColumn(TableMetadata* table, const string name, unsigned int length);
+		VarcharColumn(
+			TableMetadata* table,
+			const string name,
+			const unsigned int length,
+			const bool notNull = false
+		);
 };
 
 class IntegerColumn: public Column{
 	public:
-		IntegerColumn(TableMetadata* table, const string name);
+		IntegerColumn(
+			TableMetadata* table,
+			const string name,
+			const bool notNull = false
+		);
 };
 
 class IdentifierColumn: public Column{
 	public:
-		IdentifierColumn(TableMetadata* table, const string name);
+		IdentifierColumn(
+			TableMetadata* table,
+			const string name,
+			const bool notNull = false
+		);
 };
 
 class PrimaryKey{
