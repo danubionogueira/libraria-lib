@@ -3,6 +3,7 @@
 #include <cstring>
 
 using std::string;
+using std::stoi;
 
 string Utils::toUpper(const string str){
 	char* result = (char*)str.c_str();
@@ -28,4 +29,8 @@ string Utils::toString(const int num){
 
 string Utils::toString(const unsigned int num){
 	return std::to_string(num);
+}
+
+int Utils::toInt(const string str){
+	return stoi(str);
 }

@@ -8,4 +8,6 @@ namespace Utils{
 	string toLower(const string str);
 	string toString(const int num);
 	string toString(const unsigned int num);
+
+	int toInt(const string str);
 };

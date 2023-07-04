@@ -137,7 +137,7 @@ class Column: public ColumnMetaData{
 	private:
 		ColumnMetaData* metadata;
 		TableMetadata* table;
-		Statement* statement;
+		string value;
 	public:
 		TableMetadata* getTable();
 
@@ -154,6 +154,8 @@ class Column: public ColumnMetaData{
 			const unsigned int length = 0,
 			const bool notNull = false
 		);
+
+		Column(Column* other);
 };
 
 class VarcharColumn: public Column{
@@ -259,4 +261,20 @@ class Table: public TableMetadata{
 		void drop(Transaction* transaction);
 
 		Table(const string name);
+};
+
+class Insert{
+	private:
+		TableMetadata* table;
+		deque <Column*> columns;
+	public:
+		TableMetadata* getTable();
+		Column* at(const size_t idx);
+		size_t size();
+
+		void add(Column* column);
+		void execute(Transaction* transaction);
+
+		Insert(TableMetadata* table);
+		~Insert();
 };
