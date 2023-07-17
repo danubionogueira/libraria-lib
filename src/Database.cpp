@@ -567,6 +567,45 @@ void Insert::add(Column* column){
 }
 
 void Insert::execute(Transaction* transaction){
+	Statement* stmt = new Statement(transaction);
+	size_t size = columns.size();
+	string sql = "INSERT INTO " + table->getName() + "(";
+
+	for (size_t i=0; i<size; i++){
+		Column* column = columns.at(i);
+
+		sql = sql + "\t" + column->getName();
+
+		if (i < size - 1)
+			sql = sql + ",";
+
+		sql = sql + "\n";
+	}
+
+	sql = sql + ")\nVALUES(";
+
+	for (size_t i=0; i<size; i++){
+		Column* column = columns.at(i);
+		bool isVarchar = Utils::toUpper(column->getType()) == "VARCHAR";
+
+		sql = sql + "\t";
+
+		if (isVarchar)
+			sql = sql + "'";
+
+		sql = sql + column->getAsString();
+
+		if (isVarchar)
+			sql = sql + "'";
+
+		if (i < size - 1)
+			sql = sql + ",";
+
+		sql = sql + "\n";
+	}
+
+	sql = sql + ");";
+	stmt->executeSQL(sql);
 }
 
 Insert::Insert(TableMetadata* table){

@@ -282,6 +282,10 @@ void testDatabase(Test* test){
 	ForeignKey* bookAuthorBookFK = new ForeignKey(bookAuthor, book, "book_author_book_fk");
 	ForeignKey* bookAuthorAuthorFK = new ForeignKey(bookAuthor, author, "book_author_author_fk");
 
+	Insert* insertAuthor = new Insert(author);
+	Insert* insertBook = new Insert(book);
+	Insert* insertBookAuthor = new Insert(bookAuthor);
+
 	authorPK->add(authorId);
 	bookPK->add(bookId);
 	bookAuthorPK->add(bookAuthorBookId);
@@ -305,6 +309,29 @@ void testDatabase(Test* test){
 	bookAuthor->create(tr);
 	testSuccess(test, name, "Created Book Author table");
 
+	tr->commit(); // this is necessary for inserts
+
+	authorLastName->setAsString("Last");
+	authorFirstName->setAsString("First");
+	authorMiddleName->setAsString("Middle");
+	insertAuthor->add(authorLastName);
+	insertAuthor->add(authorFirstName);
+	insertAuthor->add(authorMiddleName);
+	insertAuthor->execute(tr);
+	testSuccess(test, name, "Inserted Author");
+
+	bookTitle->setAsString("Book Title");
+	insertBook->add(bookTitle);
+	insertBook->execute(tr);
+	testSuccess(test, name, "Inserted Book");
+
+	bookAuthorBookId->setAsInteger(1);
+	bookAuthorAuthorId->setAsInteger(1);
+	insertBookAuthor->add(bookAuthorBookId);
+	insertBookAuthor->add(bookAuthorAuthorId);
+	insertBookAuthor->execute(tr);
+	testSuccess(test, name, "Inserted Book Author");
+
 	bookAuthorBookFK->drop(tr);
 	bookAuthorAuthorFK->drop(tr);
 	testSuccess(test, name, "Dropped all foreign keys");
@@ -321,6 +348,36 @@ void testDatabase(Test* test){
 
 	db->drop();
 	testSuccess(test, name, "Dropped Libraria database");
+
+	delete insertBook;
+	delete insertAuthor;
+
+	delete bookAuthorAuthorFK;
+	delete bookAuthorBookFK;
+	delete bookAuthorPK;
+	delete bookAuthorAuthorId;
+	delete bookAuthorBookId;
+	delete bookAuthor;
+
+	delete bookPK;
+	delete bookTitle;
+	delete bookId;
+	delete book;
+
+	delete authorPK;
+	delete authorMiddleNameAbbreviation;
+	delete authorFirstNameAbbreviation;
+	delete authorLastNameAbbreviation;
+	delete authorMiddleName;
+	delete authorFirstName;
+	delete authorLastName;
+	delete authorId;
+	delete author;
+
+	delete tr;
+	delete db;
+	delete srv;
+	delete dba;
 }
 
 void Test::addSuccess(string testName, string testFile, unsigned int fileLine, string message){
