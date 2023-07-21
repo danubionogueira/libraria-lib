@@ -199,6 +199,21 @@ Statement::Statement(Transaction* transaction){
 	ibst = NULL;
 }
 
+string TableMetadata::getName(){
+	return name;
+}
+
+TableMetadata::TableMetadata(string name){
+	this->name = name;
+}
+
+TableMetadata::~TableMetadata(){
+}
+
+TableMetadata* ColumnMetaData::getTable(){
+	return table;
+}
+
 string ColumnMetaData::getType(){
 	return type;
 }
@@ -216,26 +231,25 @@ bool ColumnMetaData::getNotNull(){
 }
 
 ColumnMetaData::ColumnMetaData(
+	TableMetadata* table,
 	const string type,
 	const string name,
 	const unsigned int length,
 	const bool notNull
 ){
+	this->table = table;
 	this->type = type;
 	this->name = name;
 	this->length = length;
 	this->notNull = notNull;
 }
 
-string TableMetadata::getName(){
-	return name;
-}
-
-TableMetadata::TableMetadata(string name){
-	this->name = name;
-}
-
-TableMetadata::~TableMetadata(){
+ColumnMetaData::ColumnMetaData(ColumnMetaData* other){
+	this->table = other->table;
+	this->type = other->type;
+	this->name = other->name;
+	this->length = other->length;
+	this->notNull = other->notNull;
 }
 
 TableMetadata* Column::getTable(){
@@ -264,7 +278,7 @@ Column::Column(
 	const string name,
 	const unsigned int length,
 	const bool notNull
-): ColumnMetaData(type, name, length, notNull){
+): ColumnMetaData(table, type, name, length, notNull){
 	this->table = table;
 	this->value = "";
 
@@ -551,7 +565,7 @@ TableMetadata* Insert::getTable(){
 	return table;
 }
 
-Column* Insert::at(const size_t idx){
+ColumnMetaData* Insert::at(const size_t idx){
 	return columns.at(idx);
 }
 
@@ -559,11 +573,16 @@ size_t Insert::size(){
 	return columns.size();
 }
 
-void Insert::add(Column* column){
+void Insert::add(ColumnMetaData* column, int value){
+	add(column, Utils::toString(value));
+}
+
+void Insert::add(ColumnMetaData* column, string value){
 	if (column->getTable() != table)
 		throw InvalidTableException();
 
-	columns.push_back(new Column(column));
+	columns.push_back(new ColumnMetaData(column));
+	values.push_back(value);
 }
 
 void Insert::execute(Transaction* transaction){
@@ -572,7 +591,7 @@ void Insert::execute(Transaction* transaction){
 	string sql = "INSERT INTO " + table->getName() + "(";
 
 	for (size_t i=0; i<size; i++){
-		Column* column = columns.at(i);
+		ColumnMetaData* column = columns.at(i);
 
 		sql = sql + "\t" + column->getName();
 
@@ -585,7 +604,8 @@ void Insert::execute(Transaction* transaction){
 	sql = sql + ")\nVALUES(";
 
 	for (size_t i=0; i<size; i++){
-		Column* column = columns.at(i);
+		ColumnMetaData* column = columns.at(i);
+		string value = values.at(i);
 		bool isVarchar = Utils::toUpper(column->getType()) == "VARCHAR";
 
 		sql = sql + "\t";
@@ -593,7 +613,7 @@ void Insert::execute(Transaction* transaction){
 		if (isVarchar)
 			sql = sql + "'";
 
-		sql = sql + column->getAsString();
+		sql = sql + value;
 
 		if (isVarchar)
 			sql = sql + "'";
@@ -614,7 +634,7 @@ Insert::Insert(TableMetadata* table){
 
 Insert::~Insert(){
 	while (columns.size() > 0){
-		Column* column = columns.back();
+		ColumnMetaData* column = columns.back();
 		delete column;
 		columns.pop_back();
 	}

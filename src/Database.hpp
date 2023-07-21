@@ -103,26 +103,6 @@ class Statement{
 		Statement(Transaction* transaction);
 };
 
-class ColumnMetaData{
-	private:
-		string type;
-		string name;
-		unsigned int length;
-		bool notNull;
-	public:
-		string getType();
-		string getName();
-		unsigned int getLength();
-		bool getNotNull();
-
-		ColumnMetaData(
-			const string type,
-			const string name,
-			const unsigned int length = 0,
-			const bool notNull = false
-		);
-};
-
 class TableMetadata{
 	private:
 		string name;
@@ -131,6 +111,31 @@ class TableMetadata{
 
 		TableMetadata(const string name);
 		virtual ~TableMetadata();
+};
+
+class ColumnMetaData{
+	private:
+		TableMetadata* table;
+		string type;
+		string name;
+		unsigned int length;
+		bool notNull;
+	public:
+		TableMetadata* getTable();
+		string getType();
+		string getName();
+		unsigned int getLength();
+		bool getNotNull();
+
+		ColumnMetaData(
+			TableMetadata* table,
+			const string type,
+			const string name,
+			const unsigned int length = 0,
+			const bool notNull = false
+		);
+
+		ColumnMetaData(ColumnMetaData* other);
 };
 
 class Column: public ColumnMetaData{
@@ -266,15 +271,121 @@ class Table: public TableMetadata{
 class Insert{
 	private:
 		TableMetadata* table;
-		deque <Column*> columns;
+		deque <ColumnMetaData*> columns;
+		deque <string> values;
 	public:
 		TableMetadata* getTable();
-		Column* at(const size_t idx);
+		ColumnMetaData* at(const size_t idx);
 		size_t size();
 
-		void add(Column* column);
+		void add(ColumnMetaData* column, int value);
+		void add(ColumnMetaData* column, string value);
 		void execute(Transaction* transaction);
 
 		Insert(TableMetadata* table);
 		~Insert();
+};
+
+class Clause {
+	public:
+		virtual string SQLText();
+
+		Clause(Column* column);
+};
+
+class AndClause: public Clause {
+	public:
+		string SQLText();
+
+		AndClause(Clause* clauseLeft, Clause* clauseRight);
+};
+
+class OrClause: public Clause {
+	public:
+		string SQLText();
+
+		OrClause(Clause* clauseLeft, Clause* clauseRight);
+};
+
+class NotClause: public Clause {
+	public:
+		string SQLText();
+
+		NotClause(Clause* clause);
+};
+
+class EqualClause: public Clause {
+	public:
+		string SQLText();
+
+		EqualClause(ColumnMetaData* column, int value);
+		EqualClause(ColumnMetaData* column, string value);
+};
+
+class LikeClause: public Clause {
+	public:
+		string SQLText();
+
+		LikeClause(ColumnMetaData* column, string value);
+};
+
+class LesserThanClause: public Clause {
+	public:
+		string SQLText();
+
+		LesserThanClause(ColumnMetaData* column, int value);
+};
+
+class LesserThanOrEqualClause: public Clause {
+	public:
+		string SQLText();
+
+		LesserThanOrEqualClause(ColumnMetaData* column, int value);
+};
+
+class GreaterThanClause: public Clause {
+	public:
+		string SQLText();
+
+		GreaterThanClause(ColumnMetaData* column, int value);
+};
+
+class GreaterThanOrEqualClause: public Clause {
+	public:
+		string SQLText();
+
+		GreaterThanOrEqualClause(ColumnMetaData* column, int value);
+};
+
+class BetweenClause: public Clause {
+	public:
+		string SQLText();
+
+		BetweenClause(ColumnMetaData* column, int minValue, int maxValue);
+};
+
+class IsNullClause: public Clause {
+	public:
+		string SQLText();
+
+		IsNullClause(ColumnMetaData* column);
+};
+
+class IsNotNullClause: public Clause {
+	public:
+		string SQLText();
+
+		IsNotNullClause(ColumnMetaData* column);
+};
+
+class Select {
+	private:
+		TableMetadata* table;
+		deque<ColumnMetaData*> columns;
+		deque<Clause*> clauses;
+	public:
+		void addColumn(ColumnMetaData* column);
+		void addClause(Clause* clause);
+
+		Select(TableMetadata* table);
 };

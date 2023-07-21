@@ -311,24 +311,18 @@ void testDatabase(Test* test){
 
 	tr->commit(); // this is necessary for inserts
 
-	authorLastName->setAsString("Last");
-	authorFirstName->setAsString("First");
-	authorMiddleName->setAsString("Middle");
-	insertAuthor->add(authorLastName);
-	insertAuthor->add(authorFirstName);
-	insertAuthor->add(authorMiddleName);
+	insertAuthor->add(authorLastName, "Last");
+	insertAuthor->add(authorFirstName, "First");
+	insertAuthor->add(authorMiddleName, "Middle");
 	insertAuthor->execute(tr);
 	testSuccess(test, name, "Inserted Author");
 
-	bookTitle->setAsString("Book Title");
-	insertBook->add(bookTitle);
+	insertBook->add(bookTitle, "Book Title");
 	insertBook->execute(tr);
 	testSuccess(test, name, "Inserted Book");
 
-	bookAuthorBookId->setAsInteger(1);
-	bookAuthorAuthorId->setAsInteger(1);
-	insertBookAuthor->add(bookAuthorBookId);
-	insertBookAuthor->add(bookAuthorAuthorId);
+	insertBookAuthor->add(bookAuthorBookId, 1);
+	insertBookAuthor->add(bookAuthorAuthorId, 1);
 	insertBookAuthor->execute(tr);
 	testSuccess(test, name, "Inserted Book Author");
 
