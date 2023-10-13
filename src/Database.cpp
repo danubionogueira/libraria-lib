@@ -133,7 +133,7 @@ Database* Transaction::getDatabase(){
 }
 
 void Transaction::start(){
-	if (ibtr == NULL)
+	if (ibtr == nullptr)
 		ibtr = IBPP::TransactionFactory(
 			database->ibdb,
 			IBPP::amWrite,
@@ -157,14 +157,14 @@ void Transaction::rollback(){
 
 bool Transaction::started(){
 	return (
-		(ibtr == NULL) ||
+		(ibtr == nullptr) ||
 		(ibtr->Started())
 	);
 }
 
 Transaction::Transaction(Database* database){
 	this->database = database;
-	ibtr = NULL;
+	ibtr = nullptr;
 }
 
 Transaction* Statement::getTransaction(){
@@ -196,7 +196,7 @@ string Statement::getColumnAsString(const string name){
 
 Statement::Statement(Transaction* transaction){
 	this->transaction = transaction;
-	ibst = NULL;
+	ibst = nullptr;
 }
 
 string TableMetadata::getName(){
@@ -338,7 +338,7 @@ string PrimaryKey::getName(){
 }
 
 void PrimaryKey::add(Column* column){
-	if (table == NULL)
+	if (table == nullptr)
 		table = column->getTable();
 	else if (table != column->getTable())
 		throw InvalidTableException();
@@ -542,7 +542,7 @@ void Table::create(Transaction* transaction){
 	sql = sql + ");\n";
 	stmt->executeSQL(sql);
 
-	if (primaryKey != NULL)
+	if (primaryKey != nullptr)
 		primaryKey->create(transaction);
 
 	for (size_t i=0; i<foreignKeys.size(); i++){
@@ -558,7 +558,7 @@ void Table::drop(Transaction* transaction){
 }
 
 Table::Table(const string name): TableMetadata(name){
-	primaryKey = NULL;
+	primaryKey = nullptr;
 }
 
 TableMetadata* Insert::getTable(){
@@ -638,4 +638,133 @@ Insert::~Insert(){
 		delete column;
 		columns.pop_back();
 	}
+}
+
+string Clause::SQLText(){
+	return "";
+}
+
+Clause::Clause(unsigned short int indent){
+	this->indent = indent;
+}
+
+string AndClause::SQLText(){
+	size_t size = clauses.size();
+	string result = "";
+
+	for (size_t i=0; i<size; i++){
+		for (unsigned short int j=0; j<indent; j++)
+			result = result + "\t";
+
+		result = result + "(" + clauses.at(i)->SQLText() + ")";
+
+		if (i < size - 1)
+			result = result + " AND\n";
+	}
+
+	return result;
+}
+
+void AndClause::add(Clause* clause){
+	clauses.push_back(clause);
+}
+
+AndClause::AndClause(
+	Clause* leftClause,
+	Clause* rightClause,
+	unsigned short int indent
+):Clause(indent){
+	add(leftClause);
+	add(rightClause);
+}
+
+string OrClause::SQLText(){
+	size_t size = clauses.size();
+	string result = "";
+
+	for (size_t i=0; i<size; i++){
+		for (unsigned short int j=0; j<indent; j++)
+			result = result + "\t";
+
+		result = result + "(" + clauses.at(i)->SQLText() + ")";
+
+		if (i < size - 1)
+			result = result + " OR\n";
+	}
+
+	return result;
+}
+
+void OrClause::add(Clause* clause){
+	clauses.push_back(clause);
+}
+
+OrClause::OrClause(
+	Clause* leftClause,
+	Clause* rightClause,
+	unsigned short int indent
+): Clause(indent){
+	add(leftClause);
+	add(rightClause);
+}
+
+string EqualClause::SQLText(){
+	return column->getName() + " = " + value;
+}
+
+string NotClause::SQLText(){
+	return "(NOT " + clause->SQLText() + ")";
+}
+
+NotClause::NotClause(Clause* clause){
+	this->clause = clause;
+}
+
+EqualClause::EqualClause(
+	ColumnMetaData* column,
+	int value
+):EqualClause(column, Utils::toString(value)){
+}
+
+EqualClause::EqualClause(ColumnMetaData* column, string value):Clause(){
+	this->column = column;
+	this->value = value;
+}
+
+size_t Row::size(){
+	return columns.size();
+}
+
+Column* Row::at(const size_t idx){
+	return columns.at(idx);
+}
+
+Column* Row::getColumnByName(const string name){
+	for (size_t i=0; i<columns.size(); i++){
+		Column* column = columns.at(i);
+
+		if (column->getName() == name)
+			return column;
+	}
+
+	return nullptr;
+}
+
+void Select::addColumn(ColumnMetaData* column){
+	if (column->getTable() != table)
+		throw InvalidTableException();
+
+	columns.push_back(column);
+}
+
+void Select::addClause(Clause* clause){
+	clauses.push_back(clause);
+}
+
+Row* Select::fetch(Transaction* transaction){
+	return nullptr;
+}
+
+Select::Select(TableMetadata* table){
+	this->table = table;
 }

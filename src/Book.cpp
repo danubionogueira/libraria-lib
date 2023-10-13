@@ -259,7 +259,7 @@ Author* Authors::search(const string lastName, const string firstName, const str
 			return author;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int PublishingDate::getYear(){
@@ -407,14 +407,14 @@ void Book::setISBN(const string isbn){
 
 Book::Book(const string title){
 	authors = new Authors();
-	publishingDate = NULL;
+	publishingDate = nullptr;
 	setTitle(title);
 }
 
 Book::~Book(){
 	delete authors;
 
-	if (publishingDate != NULL)
+	if (publishingDate != nullptr)
 		delete publishingDate;
 }
 
@@ -452,7 +452,7 @@ Book* Books::search(const Author* author, const string title){
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Book* Books::search(const string isbn){
@@ -466,5 +466,5 @@ Book* Books::search(const string isbn){
 			return book;
 	}
 
-	return NULL;
+	return nullptr;
 }

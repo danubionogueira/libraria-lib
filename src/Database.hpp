@@ -287,27 +287,37 @@ class Insert{
 };
 
 class Clause {
+	protected:
+		unsigned short int indent;
 	public:
 		virtual string SQLText();
 
-		Clause(Column* column);
+		Clause(unsigned short int indent = 1);
 };
 
 class AndClause: public Clause {
+	private:
+		deque<Clause*> clauses;
 	public:
 		string SQLText();
+		void add(Clause* clause);
 
-		AndClause(Clause* clauseLeft, Clause* clauseRight);
+		AndClause(Clause* leftClause, Clause* rightClause, unsigned short int indent = 1);
 };
 
 class OrClause: public Clause {
+	private:
+		deque<Clause*> clauses;
 	public:
 		string SQLText();
+		void add(Clause* clause);
 
-		OrClause(Clause* clauseLeft, Clause* clauseRight);
+		OrClause(Clause* leftClause, Clause* rightClause, unsigned short int indent = 1);
 };
 
 class NotClause: public Clause {
+	private:
+		Clause* clause;
 	public:
 		string SQLText();
 
@@ -315,6 +325,9 @@ class NotClause: public Clause {
 };
 
 class EqualClause: public Clause {
+	private:
+		ColumnMetaData* column;
+		string value;
 	public:
 		string SQLText();
 
@@ -378,6 +391,18 @@ class IsNotNullClause: public Clause {
 		IsNotNullClause(ColumnMetaData* column);
 };
 
+class Row {
+	private:
+		deque<Column*> columns;
+	public:
+		size_t size();
+		Column* at(const size_t idx);
+
+		Column* getColumnByName(const string name);
+
+		Row();
+};
+
 class Select {
 	private:
 		TableMetadata* table;
@@ -386,6 +411,8 @@ class Select {
 	public:
 		void addColumn(ColumnMetaData* column);
 		void addClause(Clause* clause);
+
+		Row* fetch(Transaction* transaction);
 
 		Select(TableMetadata* table);
 };

@@ -108,7 +108,7 @@ void testAuthorsSearch(Test* test){
 	Author* first = new Author("First Middle Last");
 	Author* second = new Author("Second Middle Last");
 	Author* third = new Author("Third Mid Las");
-	Author* result = NULL;
+	Author* result = nullptr;
 
 	authors->add(first);
 	authors->add(second);
@@ -124,7 +124,7 @@ void testAuthorsSearch(Test* test){
 	test(test, name, result->getFullName() == third->getFullName(), "Search third author ok", "Search third author wrong");
 
 	result = authors->search("Last", "Third", "Middle");
-	test(test, name, result == NULL, "Search invalid author ok", "Search invalid author wrong");
+	test(test, name, result == nullptr, "Search invalid author ok", "Search invalid author wrong");
 
 	delete first;
 	delete second;
@@ -203,7 +203,7 @@ void testBooksSearch(Test* test){
 
 	Book* firstB = new Book("First Book");
 	Book* secondB = new Book("Second Book");
-	Book* result = NULL;
+	Book* result = nullptr;
 
 	firstB->getAuthors()->add(firstA);
 	secondB->getAuthors()->add(secondA);
@@ -218,7 +218,7 @@ void testBooksSearch(Test* test){
 	test(test, name, result->getTitle() == secondB->getTitle(), "Search second book ok", "Search second book wrong");
 
 	result = books->search(secondA, "First Book");
-	test(test, name, result == NULL, "Search invalid book ok", "Search invalid book wrong");
+	test(test, name, result == nullptr, "Search invalid book ok", "Search invalid book wrong");
 
 	firstB->setISBN("1234567890123");
 	secondB->setISBN("1234567890");
@@ -230,7 +230,7 @@ void testBooksSearch(Test* test){
 	test(test, name, result->getTitle() == secondB->getTitle(), "Search second book ISBN ok", "Search second book ISBN wrong");
 
 	result = books->search("3210987654321");
-	test(test, name, result == NULL, "Search invalid book ISBN ok", "Search invalid book ISBN wrong");
+	test(test, name, result == nullptr, "Search invalid book ISBN ok", "Search invalid book ISBN wrong");
 
 	delete firstA;
 	delete secondA;
@@ -286,6 +286,12 @@ void testDatabase(Test* test){
 	Insert* insertBook = new Insert(book);
 	Insert* insertBookAuthor = new Insert(bookAuthor);
 
+	Select* selectAuthor = new Select(author);
+	Select* selectBook = new Select(book);
+	Select* selectBookAuthor = new Select(bookAuthor);
+
+	Row* row = nullptr;
+
 	authorPK->add(authorId);
 	bookPK->add(bookId);
 	bookAuthorPK->add(bookAuthorBookId);
@@ -326,6 +332,14 @@ void testDatabase(Test* test){
 	insertBookAuthor->execute(tr);
 	testSuccess(test, name, "Inserted Book Author");
 
+	selectBook->addColumn(bookId);
+	selectBook->addColumn(bookTitle);
+
+	while ((row = selectBook->fetch(tr)) != nullptr){
+		Column* bname = row->getColumnByName(bookTitle->getName());
+		testSuccess(test, name, "Selected Book " + bname->getAsString());
+	}
+
 	bookAuthorBookFK->drop(tr);
 	bookAuthorAuthorFK->drop(tr);
 	testSuccess(test, name, "Dropped all foreign keys");
@@ -343,6 +357,11 @@ void testDatabase(Test* test){
 	db->drop();
 	testSuccess(test, name, "Dropped Libraria database");
 
+	delete selectBookAuthor;
+	delete selectBook;
+	delete selectAuthor;
+
+	delete insertBookAuthor;
 	delete insertBook;
 	delete insertAuthor;
 
